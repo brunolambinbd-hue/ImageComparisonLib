@@ -17,7 +17,7 @@ import java.nio.ByteOrder
 public data class MyEmbedding(
     public val floatValues: FloatArray? = null,
     public val quantizedValues: ByteArray? = null,
-    public val isQuantized: Boolean = false
+    public val isQuantized: Boolean = false,
 ) {
     /**
      * Compares this embedding with another object for equality.
@@ -35,11 +35,15 @@ public data class MyEmbedding(
         if (floatValues != null) {
             if (other.floatValues == null) return false
             if (!floatValues.contentEquals(other.floatValues)) return false
-        } else if (other.floatValues != null) return false
+        } else if (other.floatValues != null) {
+            return false
+        }
         if (quantizedValues != null) {
             if (other.quantizedValues == null) return false
             if (!quantizedValues.contentEquals(other.quantizedValues)) return false
-        } else if (other.quantizedValues != null) return false
+        } else if (other.quantizedValues != null) {
+            return false
+        }
         if (isQuantized != other.isQuantized) return false
 
         return true
@@ -67,7 +71,6 @@ public data class MyEmbedding(
  */
 @SatisfiesRequirement("2.2.8.2")
 public object EmbeddingUtils {
-
     private const val TAG: String = "EmbeddingUtils"
 
     /**
@@ -107,7 +110,10 @@ public object EmbeddingUtils {
      * @return A [MyEmbedding] object containing the deserialized data.
      */
     @SatisfiesRequirement("2.2.8.2")
-    public fun byteArrayToMyEmbedding(bytes: ByteArray, fromQuantized: Boolean = false): MyEmbedding {
+    public fun byteArrayToMyEmbedding(
+        bytes: ByteArray,
+        fromQuantized: Boolean = false,
+    ): MyEmbedding {
         return if (fromQuantized) {
             MyEmbedding(quantizedValues = bytes, isQuantized = true)
         } else {

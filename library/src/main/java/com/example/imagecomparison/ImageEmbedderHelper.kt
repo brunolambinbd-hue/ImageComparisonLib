@@ -44,7 +44,7 @@ public open class ImageEmbedderHelper(
     private val context: Context,
     public var currentDelegate: Int,
     public var currentModel: Int,
-    public var listener: EmbedderListener? = null
+    public var listener: EmbedderListener? = null,
 ) {
     /**
      * Secondary constructor that provides default values for the delegate and model.
@@ -57,7 +57,7 @@ public open class ImageEmbedderHelper(
         context,
         DELEGATE_CPU,
         MODEL_MOBILENETV3_LARGE,
-        listener
+        listener,
     )
 
     /** The internal MediaPipe ImageEmbedder instance. */
@@ -74,23 +74,25 @@ public open class ImageEmbedderHelper(
     private fun setupImageEmbedder() {
         if (isInitialized) return
 
-        val modelName = when (currentModel) {
-            MODEL_MOBILENETV3_LARGE -> "mobilenet_v3_large.tflite"
-            MODEL_MOBILENETV3_SMALL -> "mobilenet_v3_small.tflite"
-            else -> "mobilenet_v3_large.tflite"
-        }
+        val modelName =
+            when (currentModel) {
+                MODEL_MOBILENETV3_LARGE -> "mobilenet_v3_large.tflite"
+                MODEL_MOBILENETV3_SMALL -> "mobilenet_v3_small.tflite"
+                else -> "mobilenet_v3_large.tflite"
+            }
 
         try {
             val baseOptionsBuilder = BaseOptions.builder().setModelAssetPath(modelName)
             if (currentDelegate == DELEGATE_GPU) {
                 baseOptionsBuilder.setDelegate(Delegate.GPU)
             }
-            val options = ImageEmbedderOptions.builder()
-                .setBaseOptions(baseOptionsBuilder.build())
-                .setL2Normalize(true)
-                .setQuantize(false)
-                .setRunningMode(RunningMode.IMAGE)
-                .build()
+            val options =
+                ImageEmbedderOptions.builder()
+                    .setBaseOptions(baseOptionsBuilder.build())
+                    .setL2Normalize(true)
+                    .setQuantize(false)
+                    .setRunningMode(RunningMode.IMAGE)
+                    .build()
 
             imageEmbedder = ImageEmbedder.createFromOptions(context, options)
             isInitialized = true
@@ -136,7 +138,10 @@ public open class ImageEmbedderHelper(
      * @return A [ResultBundle] containing the similarity score and inference time, or null on failure.
      */
     @SatisfiesRequirement("2.2.8.2")
-    public fun embed(firstBitmap: Bitmap, secondBitmap: Bitmap): ResultBundle? {
+    public fun embed(
+        firstBitmap: Bitmap,
+        secondBitmap: Bitmap,
+    ): ResultBundle? {
         if (imageEmbedder == null) return null
 
         val startTime = SystemClock.uptimeMillis()
@@ -147,7 +152,7 @@ public open class ImageEmbedderHelper(
             val inferenceTimeMs = SystemClock.uptimeMillis() - startTime
             ResultBundle(
                 ImageEmbedder.cosineSimilarity(firstEmbed, secondEmbed),
-                inferenceTimeMs
+                inferenceTimeMs,
             )
         } else {
             null
@@ -184,22 +189,31 @@ public open class ImageEmbedderHelper(
          * @param errorCode Machine-readable error code.
          */
         @SatisfiesRequirement("2.2.1.2")
-        public fun onError(error: String, errorCode: Int = UNKNOWN_ERROR)
+        public fun onError(
+            error: String,
+            errorCode: Int = UNKNOWN_ERROR,
+        )
     }
 
     public companion object {
         /** Use CPU for inference. */
         public const val DELEGATE_CPU: Int = 0
+
         /** Use GPU for inference. */
         public const val DELEGATE_GPU: Int = 1
+
         /** Large MobileNetV3 model (More accurate, slower). */
         public const val MODEL_MOBILENETV3_LARGE: Int = 0
+
         /** Small MobileNetV3 model (Faster, less accurate). */
         public const val MODEL_MOBILENETV3_SMALL: Int = 1
+
         /** Default error code. */
         public const val UNKNOWN_ERROR: Int = 0
+
         /** GPU-specific error code. */
         public const val GPU_ERROR: Int = 1
+
         /** Log tag. */
         private const val TAG: String = "ImageEmbedderHelper"
     }

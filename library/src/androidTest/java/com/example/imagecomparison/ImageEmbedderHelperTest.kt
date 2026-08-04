@@ -4,10 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,6 +50,10 @@ public class ImageEmbedderHelperTest {
     public fun embed_IdenticalImages_ReturnsMaxSimilarity() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+        
+        // Initialisation de l'embedder nécessaire avant l'appel à embed
+        helper.computeSignature(dummy)
+        
         val result = helper.embed(dummy, dummy)
         assertNotNull(result)
         assertEquals(1.0, result!!.similarity, 0.001)

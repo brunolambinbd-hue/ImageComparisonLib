@@ -9,17 +9,29 @@ allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
 
+// Récupération sécurisée du jeton SonarCloud depuis local.properties
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+val sonarToken: String? = localProperties.getProperty("sonar.token")
+
 sonarqube {
     properties {
         property("sonar.projectKey", "brunolambinbd-hue_ImageComparisonLib")
         property("sonar.organization", "brunolambinbd-hue")
         property("sonar.host.url", "https://sonarcloud.io")
+
+        // Utilisation du jeton si présent dans local.properties
+        sonarToken?.let { property("sonar.token", it) }
+
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.scm.provider", "git")
         property("sonar.gradle.skipCompile", "false")
         property(
             "sonar.exclusions",
-            "**/build/**,**/generated/**,**/.gradle/**,**/*.tflite"
+            "**/build/**,**/generated/**,**/.gradle/**,**/*.tflite",
         )
     }
 }

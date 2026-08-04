@@ -1,5 +1,5 @@
-import java.net.URL
 import java.io.File
+import java.net.URL
 
 /**
  * Tâche Gradle pour synchroniser les règles Cursor (.cursorrules) depuis le dépôt central GitHub.
