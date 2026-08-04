@@ -37,6 +37,16 @@ sonarqube {
 }
 
 subprojects {
+    dependencyLocking {
+        lockAllConfigurations()
+    }
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.name == "protobuf-javalite") {
+                useVersion("3.25.1")
+            }
+        }
+    }
     apply(plugin = "org.sonarqube")
     sonarqube {
         properties {

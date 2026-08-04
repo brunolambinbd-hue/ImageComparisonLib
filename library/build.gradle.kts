@@ -101,12 +101,6 @@ dependencies {
     androidTestImplementation(libs.truth)
 }
 
-configurations.all {
-    resolutionStrategy {
-        force("com.google.protobuf:protobuf-javalite:3.25.1")
-    }
-}
-
 afterEvaluate {
     publishing {
         publications {
