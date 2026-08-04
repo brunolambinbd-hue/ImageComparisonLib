@@ -1,0 +1,38 @@
+plugins {
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.ktlint) apply false
+}
+
+allprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "brunolambinbd-hue_ImageComparisonLib")
+        property("sonar.organization", "brunolambinbd-hue")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.sourceEncoding", "UTF-8")
+        property("sonar.scm.provider", "git")
+        property("sonar.gradle.skipCompile", "false")
+        property(
+            "sonar.exclusions",
+            "**/build/**,**/generated/**,**/.gradle/**,**/*.tflite"
+        )
+    }
+}
+
+subprojects {
+    apply(plugin = "org.sonarqube")
+    sonarqube {
+        properties {
+            val buildDir = project.layout.buildDirectory.get().asFile
+            property("sonar.junit.reportPaths", "$buildDir/test-results/testDebugUnitTest")
+            property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        }
+    }
+}
+
+apply(from = "sync-standards.gradle.kts")
