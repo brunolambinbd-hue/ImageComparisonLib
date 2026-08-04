@@ -32,7 +32,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.computeSignature] returns a 1280-dim vector for the Large model.
      */
     @Test
-    @CoveredRequirement("2.2.1.2")
+    @CoveredRequirement("2.2.1.2.0")
     public fun computeSignature_LargeModel_ReturnsValidEmbedding() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -46,7 +46,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.embed] returns 1.0 similarity for identical images.
      */
     @Test
-    @CoveredRequirement("2.2.8.2")
+    @CoveredRequirement("2.2.8.2.0")
     public fun embed_IdenticalImages_ReturnsMaxSimilarity() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)

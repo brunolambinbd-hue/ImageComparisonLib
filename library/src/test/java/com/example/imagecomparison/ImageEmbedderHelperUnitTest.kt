@@ -19,7 +19,7 @@ public class ImageEmbedderHelperUnitTest {
      * Verifies constants are correctly defined.
      */
     @Test
-    @CoveredRequirement("2.2.1.2")
+    @CoveredRequirement("2.2.1.2.0")
     public fun constants_AreCorrect() {
         assertThat(ImageEmbedderHelper.DELEGATE_CPU).isEqualTo(0)
         assertThat(ImageEmbedderHelper.DELEGATE_GPU).isEqualTo(1)
@@ -31,7 +31,7 @@ public class ImageEmbedderHelperUnitTest {
      * Verifies the secondary constructor and default values.
      */
     @Test
-    @CoveredRequirement("2.2.1.2")
+    @CoveredRequirement("2.2.1.2.0")
     public fun secondaryConstructor_SetsDefaultValues() {
         val listener: ImageEmbedderHelper.EmbedderListener = mock()
         val helper = ImageEmbedderHelper(context, listener)
@@ -45,7 +45,7 @@ public class ImageEmbedderHelperUnitTest {
      * Verifies getters and setters for properties.
      */
     @Test
-    @CoveredRequirement("2.2.1.2")
+    @CoveredRequirement("2.2.1.2.0")
     public fun properties_GettersAndSetters_WorkCorrectly() {
         val helper = ImageEmbedderHelper(context, ImageEmbedderHelper.DELEGATE_CPU, ImageEmbedderHelper.MODEL_MOBILENETV3_LARGE)
         
@@ -64,7 +64,7 @@ public class ImageEmbedderHelperUnitTest {
      * Verifies that [ImageEmbedderHelper.clearImageEmbedder] resets state.
      */
     @Test
-    @CoveredRequirement("2.2.1.2")
+    @CoveredRequirement("2.2.1.2.0")
     public fun clearImageEmbedder_ResetsState() {
         val helper = ImageEmbedderHelper(context, null)
         // We can't easily trigger initialization without native crash, 

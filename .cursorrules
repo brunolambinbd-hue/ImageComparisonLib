@@ -26,7 +26,7 @@
 - **Example**:
   ```kotlin
   @Test
-  @CoveredRequirement("1.2.3")
+  @CoveredRequirement("1.2.3.4.0")
   fun testSaveItem_Success() { ... }
   ```
 
@@ -35,8 +35,8 @@
 - **Repeatable**: If a block of code implements multiple requirements, repeat the annotation.
 - **Example**:
   ```kotlin
-  @SatisfiesRequirement("1.2.1")
-  @SatisfiesRequirement("1.3.1")
+  @SatisfiesRequirement("1.2.1.2.0")
+  @SatisfiesRequirement("1.3.1.3.0")
   fun processData() { ... }
   ```
 

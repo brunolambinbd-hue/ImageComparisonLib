@@ -39,7 +39,7 @@ import com.google.mediapipe.tasks.vision.imageembedder.ImageEmbedder.ImageEmbedd
  * @property currentModel The embedding model to use (e.g., MobileNetV3 Large).
  * @property listener An optional listener to receive error notifications.
  */
-@SatisfiesRequirement("2.2.1.2")
+@SatisfiesRequirement("2.2.1.2.0")
 public open class ImageEmbedderHelper(
     private val context: Context,
     public var currentDelegate: Int,
@@ -52,7 +52,7 @@ public open class ImageEmbedderHelper(
      * @param context The application context.
      * @param listener The error listener.
      */
-    @SatisfiesRequirement("2.2.1.2")
+    @SatisfiesRequirement("2.2.1.2.0")
     public constructor(context: Context, listener: EmbedderListener?) : this(
         context,
         DELEGATE_CPU,
@@ -70,7 +70,7 @@ public open class ImageEmbedderHelper(
      * Configures and initializes the [ImageEmbedder] instance from MediaPipe.
      * This function sets up the model, delegate, and other options.
      */
-    @SatisfiesRequirement("2.2.1.2")
+    @SatisfiesRequirement("2.2.1.2.0")
     private fun setupImageEmbedder() {
         if (isInitialized) return
 
@@ -110,7 +110,7 @@ public open class ImageEmbedderHelper(
      * @param bitmap The input image.
      * @return An [Embedding] object, or null if the computation fails.
      */
-    @SatisfiesRequirement("2.2.1.2")
+    @SatisfiesRequirement("2.2.1.2.0")
     public open fun computeSignature(bitmap: Bitmap): Embedding? {
         setupImageEmbedder()
         if (imageEmbedder == null) return null
@@ -137,7 +137,7 @@ public open class ImageEmbedderHelper(
      * @param secondBitmap The second image.
      * @return A [ResultBundle] containing the similarity score and inference time, or null on failure.
      */
-    @SatisfiesRequirement("2.2.8.2")
+    @SatisfiesRequirement("2.2.8.2.0")
     public fun embed(
         firstBitmap: Bitmap,
         secondBitmap: Bitmap,
@@ -162,7 +162,7 @@ public open class ImageEmbedderHelper(
     /**
      * Closes the [ImageEmbedder] instance to free up resources.
      */
-    @SatisfiesRequirement("2.2.1.2")
+    @SatisfiesRequirement("2.2.1.2.0")
     public fun clearImageEmbedder() {
         imageEmbedder?.close()
         imageEmbedder = null
@@ -175,7 +175,7 @@ public open class ImageEmbedderHelper(
      * @property similarity The cosine similarity score.
      * @property inferenceTime The time taken for the computation in milliseconds.
      */
-    @SatisfiesRequirement("2.2.8.2")
+    @SatisfiesRequirement("2.2.8.2.0")
     public data class ResultBundle(public val similarity: Double, private val inferenceTime: Long)
 
     /**
@@ -188,7 +188,7 @@ public open class ImageEmbedderHelper(
          * @param error Descriptive error message.
          * @param errorCode Machine-readable error code.
          */
-        @SatisfiesRequirement("2.2.1.2")
+        @SatisfiesRequirement("2.2.1.2.0")
         public fun onError(
             error: String,
             errorCode: Int = UNKNOWN_ERROR,

@@ -33,6 +33,9 @@ sonarqube {
             "sonar.exclusions",
             "**/build/**,**/generated/**,**/.gradle/**,**/*.tflite",
         )
+
+        // Inclusion du lockfile racine
+        property("sonar.sources", "settings-gradle.lockfile")
     }
 }
 
@@ -53,6 +56,9 @@ subprojects {
             val buildDir = project.layout.buildDirectory.get().asFile
             property("sonar.junit.reportPaths", "$buildDir/test-results/testDebugUnitTest")
             property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+            
+            // Ajout explicite des sources et du lockfile
+            property("sonar.sources", "src/main/java,gradle.lockfile")
         }
     }
 }
