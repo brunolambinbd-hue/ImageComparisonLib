@@ -1,0 +1,44 @@
+ui, il est possible de forcer un Cold Boot via Gradle, mais ce n'est pas une option "native" (comme une simple propriété coldBoot = true) dans le plugin Android standard.
+Voici les deux moyens principaux d'y parvenir :
+1. Via les "Gradle Managed Devices" (Recommandé)
+Si vous utilisez les Managed Devices (appareils définis directement dans votre build.gradle.kts), Gradle gère lui-même le cycle de vie. Bien qu'il n'y ait pas de bouton "Cold Boot", Gradle crée une nouvelle instance d'image pour chaque exécution si vous nettoyez le cache, ce qui revient à un Cold Boot. Cependant, par défaut, il utilise des snapshots pour aller plus vite.
+2. Via une tâche Gradle personnalisée (Wrapper de commande)
+C'est la méthode la plus courante. On crée une tâche qui appelle l'exécutable de l'émulateur avec l'argument -no-snapshot-load.
+La commande brute que Gradle exécuterait en arrière-plan est : emulator -avd Nom_De_Votre_AVD -no-snapshot-load
+Pourquoi est-ce utile en rapport avec vos tests ?
+Dans votre fichier GmsHealthRule.kt (que j'ai vu dans le contexte), vous avez justement optimisé le code pour "attendre après un Cold Boot". Forcer un Cold Boot via Gradle permet de s'assurer que :
+•
+Les Google Play Services (GMS) repartent de zéro (évite les services qui "freeze" dans un snapshot).
+•
+La Base de données Room est vraiment réinitialisée si elle est en mémoire.
+•
+Le Keyguard (verrouillage écran) ne reste pas bloqué dans un état instable hérité d'une session précédente.
+En résumé : Gradle ne le propose pas via une option simple, mais on peut le piloter en configurant la manière dont Gradle lance l'émulateur (soit via le CLI, soit via les paramètres de CI).
+
+
+hier mon gradle a terminé en gradle a cuase de l'emulateur, donc que proposes-tu de faire pour que durant les tests le cold boot lance un cold boot, proposition seulement
+
+Pour éviter les échecs de type "Émulateur hors-ligne" (que vous avez eu hier) et garantir un état "propre" pour chaque suite de tests, voici ma proposition stratégique :
+1. Utiliser les "Gradle Managed Devices" (La solution la plus stable)
+C'est la recommandation officielle de Google. Au lieu de lancer manuellement un émulateur, vous définissez l'appareil directement dans votre fichier build.gradle.
+•
+Fonctionnement : Gradle crée, lance, exécute les tests, puis ferme l'émulateur automatiquement.
+•
+Avantage : Il garantit un état "Clean Boot" à chaque fois. Si l'émulateur plante, Gradle le tue et en relance un nouveau. Cela élimine 99% des problèmes de "Socket hang up" ou d'émulateur qui passe en mode "Offline".
+2. Créer un script de "Pre-test" automatique
+Si vous préférez garder votre émulateur actuel, on peut configurer Gradle pour qu'il exécute une tâche de nettoyage avant le lancement des tests instrumentés :
+•
+Étape A : Tuer toutes les instances d'émulateur en cours (adb emu kill).
+•
+Étape B : Lancer l'émulateur avec l'option -no-snapshot-load (pour forcer le Cold Boot).
+•
+Étape C : Attendre que l'appareil soit "Ready" via une boucle de vérification sur l'ID de l'appareil.
+3. Automatiser le "Wipe Data" via Gradle
+On peut ajouter une option dans Gradle pour que, lors du lancement, l'émulateur effectue un "Wipe Data".
+•
+Cela revient à un Cold Boot + une remise à zéro d'usine de l'appareil virtuel.
+•
+C'est radical mais c'est la seule façon d'être certain qu'aucun résidu de GMS ou de base de données d'un test précédent ne vienne corrompre le suivant.
+Ma recommandation pour vous :
+La solution 1 (Managed Devices) est la meilleure sur le long terme car elle est intégrée au cycle de vie de Gradle. Elle évite que votre console reste bloquée parce que l'émulateur ne répond plus à ADB, car c'est Gradle qui gère la communication bas niveau.
+Est-ce que l'une de ces approches (particulièrement les Managed Devices) vous semble intéressante à explorer pour stabiliser votre workflow ?

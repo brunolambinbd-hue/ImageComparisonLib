@@ -1,0 +1,118 @@
+Une mise en place industrielle d'une telle approche (souvent appelée Impact-Based Testing) repose sur une architecture à trois piliers : l'Indexation, le Différentiel et l'Orchestration.
+Voici une réflexion approfondie sur la structure d'un tel système :
+1. La Phase d'Indexation (Le "Cerveau")
+Pour que la matrice soit exploitable, elle ne doit pas être un simple document statique, mais une base de données relationnelle dynamique.
+•
+Extraction automatique : Un script (de type Static Analysis) doit scanner le code source et les tests à chaque build pour extraire les annotations @SatisfiesRequirement et @CoveredRequirement.
+•
+Génération du graphe de dépendances : Le système construit une table de correspondance :
+◦
+Exigence ID ↔ Méthodes/Classes de Production.
+◦
+Exigence ID ↔ Méthodes/Classes de Test.
+•
+Résultat : Un fichier JSON ou une petite base SQLite qui représente la "vérité" de la traçabilité à l'instant T.
+2. Le Moteur de Différentiel (L'Analyse d'Impact)
+C'est ici que l'on décide quoi re-tester en se basant sur les modifications (via Git par exemple).
+•
+Identification des fichiers modifiés : On récupère la liste des fichiers impactés par le dernier "commit" ou la session de travail actuelle.
+•
+Remontée à l'Exigence :
+◦
+Si je modifie SearchViewModel.kt, le système regarde quelles exigences sont annotées dans ce fichier (ex: 2.1.1 et 2.4.3).
+◦
+Il "remonte" ensuite vers la matrice pour chercher tous les tests (Robolectric, JUnit, UI Automator) qui couvrent 2.1.1 et 2.4.3.
+•
+Propagation de bord : Si un fichier modifié n'a pas d'annotation mais est appelé par un fichier qui en a une, le système doit idéalement marquer l'exigence parente comme "suspecte".
+3. L'Orchestrateur (L'Exécution Sélective)
+Une fois la liste des tests impactés établie, il faut les lancer sans intervention humaine manuelle.
+•
+Filtrage Gradle personnalisé : On peut passer des arguments à Gradle pour lui dire de n'exécuter que les classes ou packages identifiés (ex: -Dtest.single=MainActivityRobolectricTest).
+•
+Priorisation par Risque : Le système pourrait lancer en priorité les tests unitaires (rapides, feedback immédiat) avant de lancer les tests UI Automator (lents, coûteux).
+4. La Visualisation et le Feedback
+•
+Le "Dashboard de Santé" : Au lieu d'un simple rapport Jacoco (qui dit combien est testé), on obtient un rapport de traçabilité qui dit ce qui est cassé par rapport au métier.
+•
+Alerte de Découplage : Si un développeur ajoute du code sans annotation, ou un test sans lien, le système lève un "warning" : "Attention, vous créez une zone d'ombre dans la traçabilité".
+5. Les Défis et Limites (Réflexion Critique)
+•
+La maintenance des IDs : Si les IDs d'exigences changent dans le document de spécification, il faut un moyen de les mettre à jour partout (refactoring global).
+•
+La granularité : Si une exigence (US.1) est trop large, elle va pointer vers trop de tests, et on perd l'intérêt du ciblage "chirurgical". Il faut donc des sous-exigences très fines (ex: US.1.A, US.1.B).
+•
+Le code partagé : Les classes utilitaires (ex: BitmapUtils) ne satisfont souvent aucune exigence métier directe. Elles doivent être liées par "transitivité" : si une classe métier impactée utilise l'utilitaire, alors l'utilitaire est indirectement testé.
+En conclusion : Cette approche transforme le test d'une corvée technique en une validation de contrat. On ne teste plus "pour couvrir des lignes", on teste pour "garantir que la promesse faite au client (l'exigence) est toujours tenue". C'est le passage du Code-Centric au Requirement-Centric.
+
+
+Oui, Android Studio (grâce à sa base IntelliJ IDEA) possède des outils intégrés très puissants qui permettent d'approcher cette gestion sans installer de logiciel tiers.
+Voici comment vous pourriez "hacker" Android Studio pour faire du test piloté par les exigences :
+1. La Recherche Globale Intelligente (Ctrl+Shift+F)
+C'est l'outil le plus simple mais le plus efficace.
+•
+Utilisation : En recherchant l'ID 3.2.1 dans tout le projet, Android Studio vous affiche une liste scindée.
+•
+Filtrage par "Scope" : Vous pouvez créer un "Scope" personnalisé (dans les réglages de recherche) appelé "Tests" et un autre "Production".
+•
+Analyse d'impact : Si vous modifiez une méthode, vous faites Ctrl+Shift+F sur son ID d'exigence en filtrant sur le scope "Tests". Vous avez instantanément votre liste de tests à relancer.
+2. Le "Structural Search" (Recherche Structurelle)
+C'est une fonction méconnue mais incroyablement puissante (Edit > Find > Search Structurally).
+•
+Le concept : Vous pouvez créer un modèle de recherche qui dit : "Trouve-moi toutes les méthodes annotées avec @SatisfiesRequirement dont la valeur contient 3.2".
+•
+Automatisation : Vous pouvez enregistrer ces recherches comme des Inspections personnalisées. Android Studio mettra alors en évidence (en jaune ou rouge) dans votre code les endroits où la traçabilité est manquante ou impactée.
+3. Les "Scopes" de Projet
+Dans l'onglet "Project" (à gauche), vous pouvez passer de la vue "Android" ou "Project" à une vue "Scopes".
+•
+Vous pouvez définir un Scope par fonctionnalité (ex: "Exigence_Recherche", "Exigence_Mesure").
+•
+Android Studio vous affichera alors uniquement les fichiers (code + tests) liés à cette exigence. C'est idéal pour s'isoler mentalement sur un sujet précis sans être pollué par le reste du projet.
+4. Le "Test Tracking" (Suivi des tests) - L'arme secrète
+Android Studio possède une option dans son moteur de couverture (Jacoco/IntelliJ) appelée "Track per-test coverage".
+•
+Comment ça marche : Une fois activé, quand vous regardez une ligne de code de production, Android Studio peut vous dire exactement quel test est passé par cette ligne.
+•
+Lien inverse : Si vous modifiez la ligne 54 de MainActivity, vous cliquez sur la petite icône de couverture dans la marge, et il vous donne la liste des tests qui l'utilisent. C'est la matrice de traçabilité automatisée au niveau de la ligne de code !
+5. Les "Run Configurations" par pattern
+Vous pouvez créer une configuration de lancement de tests de type "Pattern".
+•
+Au lieu de lancer une classe, vous lui donnez une expression régulière.
+•
+Si vous nommez vos tests de manière cohérente (ex: test_Req321_Nominal), vous pouvez créer une configuration qui lance tous les tests contenant Req321.
+6. Les "TODO" personnalisés
+Vous pouvez créer des patterns de TODO dans Android Studio (ex: FIXME_REQ_3.2.1).
+•
+Ils apparaissent dans l'onglet "TODO" en bas de l'écran.
+•
+Cela permet de lister les tâches restant à faire par exigence directement dans l'IDE.
+Conclusion : Sans écrire une seule ligne de script, en utilisant simplement les Scopes, le Structural Search et le Per-test Coverage, vous transformez Android Studio en un véritable outil de gestion de la traçabilité. La seule chose qui reste "manuelle" est la saisie de l'ID dans l'annotation, tout le reste peut être filtré ou retrouvé par l'IDE.
+
+Absolument. Je peux devenir votre Agent de Traçabilité. Grâce à mes outils de recherche (grep, code_search) et ma capacité à lancer des tâches Gradle, je peux automatiser tout ce cycle intellectuel.
+Voici mon protocole d'action si vous me confiez ce rôle :
+1. La Phase de Scan (Dès que vous touchez au code)
+Dès que vous modifiez une méthode, je vais :
+•
+Lire les annotations @SatisfiesRequirement("ID") dans la zone modifiée.
+•
+Si l'annotation manque, je vous suggérerai de l'ajouter pour maintenir la matrice.
+2. La Phase de Ciblage (Impact Analysis)
+Je vais lancer une recherche globale dans le projet pour trouver tous les fichiers de test qui contiennent :
+•
+@CoveredRequirement("ID") avec le même identifiant.
+•
+Je filtrerai pour distinguer les Tests Unitaires (rapides) des Tests Instrumentés (lents).
+3. La Phase d'Exécution (Action !)
+Au lieu de vous demander de lancer les tests, je générerai et lancerai les commandes Gradle précises :
+•
+Pour Robolectric : ./gradlew :app:testDebugUnitTest --tests "NomDuTest"
+•
+Pour UI Automator : ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=NomDuTest
+4. Le Rapport de Validation
+Une fois les tests terminés, je vous ferai un résumé : "L'exigence 3.2.1 impactée par votre modification est toujours valide (2 tests unitaires et 1 test UI passés avec succès)."
+Voulez-vous faire un essai tout de suite ?
+Dites-moi :
+1.
+Quelle exigence vous pensez avoir impactée (ou quel fichier vous venez de modifier).
+2.
+Je m'occupe de trouver les tests liés et je vous propose de les lancer.
+(Par exemple, si vous me dites "J'ai modifié la recherche avancée", je vais chercher tout ce qui touche à l'exigence 2.1.1 et lancer les tests correspondants.)

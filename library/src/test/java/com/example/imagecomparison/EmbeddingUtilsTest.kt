@@ -26,7 +26,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] throws an exception for empty float embedding.
      */
     @Test(expected = IllegalArgumentException::class)
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.2")
     public fun embeddingToByteArray_EmptyFloat_ThrowsException() {
         val mockEmbedding: Embedding = mock()
         whenever(mockEmbedding.floatEmbedding()).thenReturn(floatArrayOf())
@@ -39,7 +39,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] throws an exception for null float and quantized embeddings.
      */
     @Test(expected = IllegalArgumentException::class)
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.2")
     public fun embeddingToByteArray_NullEmbeddings_ThrowsException() {
         val mockEmbedding: Embedding = mock()
         whenever(mockEmbedding.floatEmbedding()).thenReturn(null)
@@ -52,7 +52,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] handles empty quantized embedding by falling back to float.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun embeddingToByteArray_EmptyQuantized_FallsBackToFloat() {
         val testFloats = floatArrayOf(0.5f)
         val mockEmbedding: Embedding = mock()
@@ -67,7 +67,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] converts a valid float embedding correctly.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun embeddingToByteArray_ValidFloat_ConvertsCorrectly() {
         val testFloats = floatArrayOf(0.1f, -0.2f, 1.0f)
         val mockEmbedding: Embedding = mock()
@@ -86,7 +86,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] returns the same array for quantized embedding.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun embeddingToByteArray_Quantized_ReturnsSameArray() {
         val testBytes = byteArrayOf(10, 20, 30, 40)
         val mockEmbedding: Embedding = mock()
@@ -102,7 +102,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.byteArrayToMyEmbedding] restores a float embedding correctly.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun byteArrayToMyEmbedding_FloatBytes_RestoresCorrectly() {
         val buffer = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
         buffer.putFloat(0.1f).putFloat(-0.2f).putFloat(1.0f)
@@ -119,7 +119,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.byteArrayToMyEmbedding] uses default parameters correctly.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun byteArrayToMyEmbedding_DefaultParams_RestoresAsFloat() {
         val sourceBytes = byteArrayOf(0, 0, 0, 0)
         val resultEmbedding = EmbeddingUtils.byteArrayToMyEmbedding(sourceBytes)
@@ -130,7 +130,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.byteArrayToMyEmbedding] handles corrupted/truncated byte arrays.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.4")
     public fun byteArrayToMyEmbedding_TruncatedBytes_HandlesPartialFloats() {
         val sourceBytes = byteArrayOf(0, 0, 128.toByte(), 63.toByte(), 0, 0) // 1.0f (4 bytes) + 2 extra bytes
         val resultEmbedding = EmbeddingUtils.byteArrayToMyEmbedding(sourceBytes, fromQuantized = false)
@@ -144,7 +144,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.byteArrayToMyEmbedding] restores a quantized embedding correctly.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun byteArrayToMyEmbedding_QuantizedBytes_RestoresCorrectly() {
         val testBytes = byteArrayOf(1, 2, 3)
         val resultEmbedding = EmbeddingUtils.byteArrayToMyEmbedding(testBytes, fromQuantized = true)
@@ -158,7 +158,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.demoUsage] executes successfully with float embedding.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun demoUsage_WithFloat_ExecutesSuccessfully() {
         val mockEmbedding: Embedding = mock()
         whenever(mockEmbedding.floatEmbedding()).thenReturn(floatArrayOf(0.1f))
@@ -171,7 +171,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.demoUsage] executes successfully with quantized embedding.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun demoUsage_WithQuantized_ExecutesSuccessfully() {
         val mockEmbedding: Embedding = mock()
         whenever(mockEmbedding.floatEmbedding()).thenReturn(floatArrayOf(0.1f))
@@ -184,7 +184,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [MyEmbedding] equals and hashCode work as expected.
      */
     @Test
-    @CoveredRequirement("2.2.8.2.0")
+    @CoveredRequirement("REQ-2.2.8.2.1")
     public fun myEmbedding_EqualsAndHashCode_BehaveCorrectly() {
         val f1 = floatArrayOf(0.1f)
         val f2 = floatArrayOf(0.1f)
