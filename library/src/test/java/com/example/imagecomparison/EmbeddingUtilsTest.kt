@@ -4,7 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import com.google.mediapipe.tasks.components.containers.Embedding
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -20,6 +22,7 @@ import java.nio.ByteOrder
  * is accurate and handles different data types correctly.
  */
 @RunWith(RobolectricTestRunner::class)
+@Suppress("RedundantVisibilityModifier", "ReplaceCallWithBinaryOperator")
 public class EmbeddingUtilsTest {
 
     /**
@@ -125,6 +128,16 @@ public class EmbeddingUtilsTest {
         val resultEmbedding = EmbeddingUtils.byteArrayToMyEmbedding(sourceBytes)
         assertThat(resultEmbedding.isQuantized).isFalse()
     }
+    
+    /**
+     * Verifies empty byte array handling.
+     */
+    @Test
+    @CoveredRequirement("REQ-2.2.8.2.1")
+    public fun byteArrayToMyEmbedding_EmptyBytes_ReturnsEmptyEmbedding() {
+        val result = EmbeddingUtils.byteArrayToMyEmbedding(byteArrayOf(), fromQuantized = false)
+        assertThat(result.floatValues).isEmpty()
+    }
 
     /**
      * Verifies that [EmbeddingUtils.byteArrayToMyEmbedding] handles corrupted/truncated byte arrays.
@@ -132,10 +145,11 @@ public class EmbeddingUtilsTest {
     @Test
     @CoveredRequirement("REQ-2.2.8.2.4")
     public fun byteArrayToMyEmbedding_TruncatedBytes_HandlesPartialFloats() {
-        val sourceBytes = byteArrayOf(0, 0, 128.toByte(), 63.toByte(), 0, 0) // 1.0f (4 bytes) + 2 extra bytes
+        // 4 bytes for 1.0f + 3 bytes (not enough for another float)
+        val sourceBytes = byteArrayOf(0, 0, 128.toByte(), 63.toByte(), 1, 2, 3) 
         val resultEmbedding = EmbeddingUtils.byteArrayToMyEmbedding(sourceBytes, fromQuantized = false)
         
-        // Expected size is 6/4 = 1.
+        // Expected size is 7/4 = 1.
         assertThat(resultEmbedding.floatValues?.size).isEqualTo(1)
         assertThat(resultEmbedding.floatValues?.get(0)).isEqualTo(1.0f)
     }
@@ -181,44 +195,74 @@ public class EmbeddingUtilsTest {
     }
 
     /**
-     * Verifies that [MyEmbedding] equals and hashCode work as expected.
+     * Satures equals for MyEmbedding.
      */
     @Test
     @CoveredRequirement("REQ-2.2.8.2.1")
-    public fun myEmbedding_EqualsAndHashCode_BehaveCorrectly() {
+    public fun myEmbedding_Equals_Saturation() {
         val f1 = floatArrayOf(0.1f)
-        val f2 = floatArrayOf(0.1f)
         val q1 = byteArrayOf(1)
-        val q2 = byteArrayOf(1)
+        val e1 = MyEmbedding(f1, q1, false)
 
-        val e1 = MyEmbedding(f1, isQuantized = false)
-        val e2 = MyEmbedding(f2, isQuantized = false)
-        val e3 = MyEmbedding(quantizedValues = q1, isQuantized = true)
-        val e4 = MyEmbedding(quantizedValues = q2, isQuantized = true)
-
-        // Basic equality
-        assertThat(e1).isEqualTo(e1)
-        assertThat(e1).isEqualTo(e2)
-        assertThat(e1.hashCode()).isEqualTo(e2.hashCode())
-        assertThat(e3).isEqualTo(e4)
-        assertThat(e3.hashCode()).isEqualTo(e4.hashCode())
-
-        // Inequality
-        assertThat(e1).isNotEqualTo(e3)
-        assertThat(e1).isNotEqualTo(null)
-        assertThat(e1).isNotEqualTo("not an embedding")
+        // Branch: this === other
+        assertTrue(e1.equals(e1))
         
-        // Edge cases for floatValues
-        assertThat(MyEmbedding(floatValues = f1)).isNotEqualTo(MyEmbedding(floatValues = null))
-        assertThat(MyEmbedding(floatValues = null)).isNotEqualTo(MyEmbedding(floatValues = f1))
-        assertThat(MyEmbedding(floatValues = f1)).isNotEqualTo(MyEmbedding(floatValues = floatArrayOf(0.2f)))
+        // Branch: javaClass != other?.javaClass
+        assertFalse(e1.equals(null))
+        assertFalse(e1.equals("Not an embedding"))
+        
+        // Branch: isQuantized mismatch
+        assertFalse(e1.equals(e1.copy(isQuantized = true)))
+        
+        // Branch: floatValues null checks
+        val eNullFloat = MyEmbedding(null, q1, false)
+        assertFalse(e1.equals(eNullFloat)) // this.floatValues != null, other.floatValues == null
+        assertFalse(eNullFloat.equals(e1)) // this.floatValues == null, other.floatValues != null
+        
+        // Both floatValues null (covers "false" branch of else if)
+        val eBothNullFloat = MyEmbedding(null, q1, false)
+        val eBothNullFloat2 = MyEmbedding(null, q1, false)
+        assertTrue(eBothNullFloat.equals(eBothNullFloat2))
+        
+        // Branch: floatValues content mismatch (same size)
+        assertFalse(e1.equals(e1.copy(floatValues = floatArrayOf(0.2f))))
+        // Branch: floatValues content mismatch (different size)
+        assertFalse(e1.equals(e1.copy(floatValues = floatArrayOf(0.1f, 0.2f))))
+        
+        // Branch: quantizedValues null checks
+        val eNullQuant = MyEmbedding(f1, null, false)
+        assertFalse(e1.equals(eNullQuant)) // this.quantizedValues != null, other.quantizedValues == null
+        assertFalse(eNullQuant.equals(e1)) // this.quantizedValues == null, other.quantizedValues != null
+        
+        // Both quantizedValues null (covers "false" branch of else if)
+        val eBothNullQuant = MyEmbedding(f1, null, false)
+        val eBothNullQuant2 = MyEmbedding(f1, null, false)
+        assertTrue(eBothNullQuant.equals(eBothNullQuant2))
 
-        // Edge cases for quantizedValues
-        assertThat(MyEmbedding(quantizedValues = q1)).isNotEqualTo(MyEmbedding(quantizedValues = null))
-        assertThat(MyEmbedding(quantizedValues = null)).isNotEqualTo(MyEmbedding(quantizedValues = q1))
-        assertThat(MyEmbedding(quantizedValues = q1)).isNotEqualTo(MyEmbedding(quantizedValues = byteArrayOf(2)))
+        // Branch: quantizedValues content mismatch (same size)
+        assertFalse(e1.equals(e1.copy(quantizedValues = byteArrayOf(2))))
+        // Branch: quantizedValues content mismatch (different size)
+        assertFalse(e1.equals(e1.copy(quantizedValues = byteArrayOf(1, 2))))
 
-        // isQuantized mismatch
-        assertThat(MyEmbedding(isQuantized = true)).isNotEqualTo(MyEmbedding(isQuantized = false))
+        // Equality check
+        val e1Clone = MyEmbedding(floatArrayOf(0.1f), byteArrayOf(1), false)
+        assertTrue(e1.equals(e1Clone))
+        assertEquals(e1.hashCode(), e1Clone.hashCode())
+    }
+
+    /**
+     * Satures hashCode specifically.
+     */
+    @Test
+    @CoveredRequirement("REQ-2.2.8.2.1")
+    public fun myEmbedding_HashCode_Saturation() {
+        val eNull = MyEmbedding(null, null, false)
+        val h1 = eNull.hashCode()
+        
+        val eFloat = MyEmbedding(floatArrayOf(1.0f), null, false)
+        assertThat(eFloat.hashCode()).isNotEqualTo(h1)
+        
+        val eQuant = MyEmbedding(null, byteArrayOf(1), true)
+        assertThat(eQuant.hashCode()).isNotEqualTo(h1)
     }
 }
