@@ -1,4 +1,7 @@
-package com.example.imagecomparison
+package com.parabd.lib.imagecomparison
+
+import com.parabd.lib.traceability.SatisfiesRequirement
+import com.parabd.lib.traceability.CoveredRequirement
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -34,7 +37,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.computeSignature] returns a 1280-dim vector for the Large model.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.1.2.1")
+    @CoveredRequirement("2.2.1.1")
     public fun computeSignature_LargeModel_ReturnsValidEmbedding() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -48,7 +51,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.computeSignature] returns a 1024-dim vector for the Small model.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.1.2.1")
+    @CoveredRequirement("2.2.1.1")
     public fun computeSignature_SmallModel_ReturnsValidEmbedding() {
         val helper = ImageEmbedderHelper(
             context = context,
@@ -67,7 +70,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.computeSignature] returns null for recycled bitmap.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.1.2.2")
+    @CoveredRequirement("2.2.1.2")
     public fun computeSignature_RecycledBitmap_ReturnsNull() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -81,7 +84,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.computeSignature] handles internal exceptions.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.1.2.2")
+    @CoveredRequirement("2.2.1.2")
     public fun computeSignature_HardwareBitmap_TriggersCatch() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -97,7 +100,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.embed] returns 1.0 similarity for identical images.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.8.2.1")
+    @CoveredRequirement("2.2.8.1")
     public fun embed_IdenticalImages_ReturnsMaxSimilarity() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -115,7 +118,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.embed] returns null if second signature fails.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.8.2.2")
+    @CoveredRequirement("2.2.8.2")
     public fun embed_SecondRecycledBitmap_ReturnsNull() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy1 = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -133,7 +136,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.embed] returns null if first signature fails.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.8.2.2")
+    @CoveredRequirement("2.2.8.2")
     public fun embed_FirstRecycledBitmap_ReturnsNull() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy1 = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -151,7 +154,7 @@ public class ImageEmbedderHelperTest {
      * Verifies that [ImageEmbedderHelper.embed] returns null if both signatures fail.
      */
     @Test
-    @CoveredRequirement("REQ-2.2.8.2.2")
+    @CoveredRequirement("2.2.8.2")
     public fun embed_BothRecycledBitmaps_ReturnsNull() {
         val helper = ImageEmbedderHelper(context, null)
         val dummy1 = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -168,3 +171,6 @@ public class ImageEmbedderHelperTest {
         helper.clearImageEmbedder()
     }
 }
+
+
+

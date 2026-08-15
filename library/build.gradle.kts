@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.imagecomparison"
+    namespace = "com.parabd.lib.imagecomparison"
     compileSdk = 35
 
     defaultConfig {
@@ -83,7 +83,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 }
 
 dependencies {
-    api("com.example.lib:traceability:1.0.0")
+    api(libs.traceability)
     api(libs.mediapipe.tasks.vision) {
         exclude(group = "com.google.protobuf", module = "protobuf-javalite")
     }
@@ -106,10 +106,14 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
-                groupId = "com.example.lib"
+                groupId = "com.parabd.lib"
                 artifactId = "imagecomparison"
                 version = "1.0.0"
             }
         }
     }
 }
+
+
+
+

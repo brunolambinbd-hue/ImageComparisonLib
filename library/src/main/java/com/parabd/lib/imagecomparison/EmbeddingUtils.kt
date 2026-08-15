@@ -1,4 +1,7 @@
-package com.example.imagecomparison
+package com.parabd.lib.imagecomparison
+
+import com.parabd.lib.traceability.SatisfiesRequirement
+import com.parabd.lib.traceability.CoveredRequirement
 
 import android.util.Log
 import com.google.mediapipe.tasks.components.containers.Embedding
@@ -13,7 +16,7 @@ import java.nio.ByteOrder
  * @property quantizedValues The byte array for a quantized embedding.
  * @property isQuantized A flag indicating which of the two arrays is populated.
  */
-@SatisfiesRequirement("REQ-2.2.8.2.1")
+@SatisfiesRequirement("2.2.8.1")
 public data class MyEmbedding(
     public val floatValues: FloatArray? = null,
     public val quantizedValues: ByteArray? = null,
@@ -25,7 +28,7 @@ public data class MyEmbedding(
      * @param other The object to compare with.
      * @return True if embeddings values are identical.
      */
-    @SatisfiesRequirement("REQ-2.2.8.2.1")
+    @SatisfiesRequirement("2.2.8.1")
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -54,7 +57,7 @@ public data class MyEmbedding(
      *
      * @return The hash integer.
      */
-    @SatisfiesRequirement("REQ-2.2.8.2.1")
+    @SatisfiesRequirement("2.2.8.1")
     override fun hashCode(): Int {
         var result = floatValues?.contentHashCode() ?: 0
         result = 31 * result + (quantizedValues?.contentHashCode() ?: 0)
@@ -69,7 +72,7 @@ public data class MyEmbedding(
  * This utility handles the conversion of complex AI model outputs into formats suitable for
  * database storage (BLOB) and network transmission.
  */
-@SatisfiesRequirement("REQ-2.2.8.2.1")
+@SatisfiesRequirement("2.2.8.1")
 public object EmbeddingUtils {
     private const val TAG: String = "EmbeddingUtils"
 
@@ -83,7 +86,7 @@ public object EmbeddingUtils {
      * @return A [ByteArray] representation of the embedding.
      * @throws IllegalArgumentException if the embedding is null or empty.
      */
-    @SatisfiesRequirement("REQ-2.2.8.2.1")
+    @SatisfiesRequirement("2.2.8.1")
     @Suppress("kotlin:S6529") // isNullOrEmpty() is not available for FloatArray, so this check is necessary.
     public fun embeddingToByteArray(embedding: Embedding): ByteArray {
         // Vérifie d'abord l'embedding quantifié
@@ -109,7 +112,7 @@ public object EmbeddingUtils {
      * @param fromQuantized True if the original embedding was quantized (INT8).
      * @return A [MyEmbedding] object containing the deserialized data.
      */
-    @SatisfiesRequirement("REQ-2.2.8.2.1")
+    @SatisfiesRequirement("2.2.8.1")
     public fun byteArrayToMyEmbedding(
         bytes: ByteArray,
         fromQuantized: Boolean = false,
@@ -133,7 +136,7 @@ public object EmbeddingUtils {
      *
      * @param embedding The original embedding to process.
      */
-    @SatisfiesRequirement("REQ-2.2.8.2.1")
+    @SatisfiesRequirement("2.2.8.1")
     @Suppress("unused")
     public fun demoUsage(embedding: Embedding) {
         val bytes = embeddingToByteArray(embedding)
@@ -142,3 +145,6 @@ public object EmbeddingUtils {
         Log.d(TAG, "Original : ${bytes.size} bytes, restauré : ${if (restored.isQuantized) "quantized" else "float"}")
     }
 }
+
+
+

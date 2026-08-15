@@ -13,7 +13,7 @@ Ce document définit la stratégie pour extraire le module `:imagecomparison` du
 *Action : Création d'un nouveau projet "Android Library" dans Android Studio.*
 
 1.  **Nom du projet** : `ImageComparisonLib`.
-2.  **Package racine** : `com.example.imagecomparison`.
+2.  **Package racine** : `com.parabd.lib.imagecomparison`.
 3.  **Configuration SDK** :
     *   `minSdk` : 26 (cohérent avec ParaBDCollector).
     *   `targetSdk / compileSdk` : 35 (Android 15).
@@ -65,3 +65,4 @@ Ce document définit la stratégie pour extraire le module `:imagecomparison` du
 *   **Versionnage** : Vous pourrez faire évoluer la librairie vers une version `1.1.0` sans impacter immédiatement l'application.
 *   **Protection Protobuf** : Si MediaPipe nécessite une version spécifique de Protobuf, elle sera encapsulée dans le fichier `.aar`, limitant les conflits globaux.
 *   **Indépendance Studio** : Vous pourrez ouvrir `ImageComparisonLib` avec une version plus ancienne d'Android Studio si une version future de l'IDE devient incompatible avec MediaPipe.
+

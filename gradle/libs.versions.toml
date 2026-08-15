@@ -19,6 +19,8 @@ sonar = "5.1.0.4882"
 jacoco = "0.8.15"
 ktlint = "12.1.1"
 dokka = "1.9.20"
+traceability = "1.0.0"
+
 
 # Nouvelle version pour MediaPipe
 mediaPipe = "0.10.29"
@@ -60,6 +62,8 @@ image-cropper = { group = "com.vanniktech", name = "android-image-cropper", vers
 
 # Nouvelle librairie MediaPipe
 mediapipe-tasks-vision = { group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediaPipe" }
+traceability = { group = "com.parabd.lib", name = "traceability", version.ref = "traceability" }
+
 
 # Librairies de Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -98,3 +102,4 @@ sonarqube = { id = "org.sonarqube", version.ref = "sonar" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 download = { id = "de.undercouch.download", version.ref = "download" }
+
