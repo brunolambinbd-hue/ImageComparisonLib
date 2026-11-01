@@ -73,6 +73,11 @@ public data class MyEmbedding(
  * database storage (BLOB) and network transmission.
  */
 @SatisfiesRequirement("2.2.8.1")
+@SatisfiesRequirement("2.2.3.1")
+@SatisfiesRequirement("2.2.3.2")
+@SatisfiesRequirement("2.2.3.3")
+@SatisfiesRequirement("2.2.3.4")
+@SatisfiesRequirement("2.2.3.9")
 public object EmbeddingUtils {
     private const val TAG: String = "EmbeddingUtils"
 

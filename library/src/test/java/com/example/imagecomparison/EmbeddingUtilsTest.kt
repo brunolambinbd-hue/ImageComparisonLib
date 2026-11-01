@@ -32,6 +32,11 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] throws an exception for empty float embedding.
      */
     @Test(expected = IllegalArgumentException::class)
+    @CoveredRequirement("2.2.3.1.1")
+    @CoveredRequirement("2.2.3.2.1")
+    @CoveredRequirement("2.2.3.3.1")
+    @CoveredRequirement("2.2.3.4.1")
+    @CoveredRequirement("2.2.3.9.1")
     @CoveredRequirement("2.2.8.2")
     public fun embeddingToByteArray_EmptyFloat_ThrowsException() {
         val mockEmbedding: Embedding = mock()
@@ -73,7 +78,7 @@ public class EmbeddingUtilsTest {
      * Verifies that [EmbeddingUtils.embeddingToByteArray] converts a valid float embedding correctly.
      */
     @Test
-    @CoveredRequirement("2.2.8.1")
+    @CoveredRequirement("2.2.8.1.10")
     public fun embeddingToByteArray_ValidFloat_ConvertsCorrectly() {
         val testFloats = floatArrayOf(0.1f, -0.2f, 1.0f)
         val mockEmbedding: Embedding = mock()

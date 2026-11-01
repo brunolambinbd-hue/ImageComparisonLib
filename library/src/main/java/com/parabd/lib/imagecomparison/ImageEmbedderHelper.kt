@@ -48,6 +48,7 @@ public open class ImageEmbedderHelper(
     public var currentDelegate: Int,
     public var currentModel: Int,
     public var listener: EmbedderListener? = null,
+    public var customModelPath: String? = null // Nouveau paramètre pour les noms courts
 ) {
     /**
      * Secondary constructor that provides default values for the delegate and model.
@@ -61,6 +62,7 @@ public open class ImageEmbedderHelper(
         DELEGATE_CPU,
         MODEL_MOBILENETV3_LARGE,
         listener,
+        null
     )
 
     /** The internal MediaPipe ImageEmbedder instance. */
@@ -77,14 +79,21 @@ public open class ImageEmbedderHelper(
     private fun setupImageEmbedder() {
         if (isInitialized) return
 
-        val modelName =
-            when (currentModel) {
-                MODEL_MOBILENETV3_LARGE -> "mobilenet_v3_large.tflite"
-                MODEL_MOBILENETV3_SMALL -> "mobilenet_v3_small.tflite"
-                else -> "mobilenet_v3_large.tflite"
-            }
+        val modelName = customModelPath ?: when (currentModel) {
+            MODEL_MOBILENETV3_LARGE -> "mobilenet_v3_large.tflite"
+            MODEL_MOBILENETV3_SMALL -> "mobilenet_v3_small.tflite"
+            else -> "mobilenet_v3_large.tflite"
+        }
 
         try {
+            Log.d(TAG, "Initializing ImageEmbedder with model: $modelName")
+            
+            // Verification of asset existence to avoid native crash
+            val assetExists = context.assets.list("")?.contains(modelName) ?: false
+            if (!assetExists) {
+                Log.e(TAG, "CRITICAL: Model file $modelName NOT FOUND in assets!")
+            }
+
             val baseOptionsBuilder = BaseOptions.builder().setModelAssetPath(modelName)
             if (currentDelegate == DELEGATE_GPU) {
                 baseOptionsBuilder.setDelegate(Delegate.GPU)
@@ -101,9 +110,9 @@ public open class ImageEmbedderHelper(
             isInitialized = true
             Log.i(TAG, "ImageEmbedder created successfully.")
         } catch (t: Throwable) {
-            val errorMsg = "Image embedder failed to load. See error logs for details"
+            val errorMsg = "Image embedder failed to load: ${t.localizedMessage}"
             listener?.onError(errorMsg, if (currentDelegate == DELEGATE_GPU) GPU_ERROR else UNKNOWN_ERROR)
-            Log.e(TAG, "MediaPipe failed to load the model with error: ${t.message}", t)
+            Log.e(TAG, "MediaPipe Initialization ERROR: ${t.message}", t)
         }
     }
 
@@ -116,7 +125,10 @@ public open class ImageEmbedderHelper(
     @SatisfiesRequirement("2.2.1.1")
     public open fun computeSignature(bitmap: Bitmap): Embedding? {
         setupImageEmbedder()
-        if (imageEmbedder == null) return null
+        if (imageEmbedder == null) {
+            Log.e(TAG, "Cannot compute signature: ImageEmbedder is NULL")
+            return null
+        }
 
         // CRUCIAL CHECK: Prevent native crash if bitmap is recycled.
         if (bitmap.isRecycled) {
@@ -178,12 +190,6 @@ public open class ImageEmbedderHelper(
      * @property similarity The cosine similarity score.
      * @property inferenceTime The time taken for the computation in milliseconds.
      */
-    /**
-     * A data class to hold the result of an embedding comparison.
-     *
-     * @property similarity The cosine similarity score.
-     * @property inferenceTime The time taken for the computation in milliseconds.
-     */
     @SatisfiesRequirement("2.2.8.1")
     public data class ResultBundle(public val similarity: Double, private val inferenceTime: Long)
 
@@ -227,6 +233,3 @@ public open class ImageEmbedderHelper(
         private const val TAG: String = "ImageEmbedderHelper"
     }
 }
-
-
-
